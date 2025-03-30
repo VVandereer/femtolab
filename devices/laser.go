@@ -1,6 +1,9 @@
 package devices
 import (
+	"fmt"
 	"bufio"
-	"sync"
+	"strings"
 	"time"
+
+	"github.com/tarm/serial"
 )
