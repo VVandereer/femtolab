@@ -64,7 +64,7 @@ func InitShooter(portName string, baudRate int) (*Shooter, error) {
 	for attempt > 0 {
 		time.Sleep(1 * time.Second)
 		shooter.clearBuffer()
-		if err := shooter.write(getCount); err != nil {
+		if err := shooter.serialPort.Write(getCount); err != nil {
 			attempt--
 			continue
 		}
