@@ -9,9 +9,28 @@ import (
 	"github.com/tarm/serial"
 )
 
+var (
+	firmwareInfo		= []byte("?f")
+	enablePower		= []byte("e")
+	disablePower		= []byte("d")
+	movePosition		= []byte("m")
+	restorePosition		= []byte("r")
+	setPosition		= []byte("p")
+	getPosition		= []byte("?p")
+	setMaxSpeed		= []byte("s")
+	getMaxSpeed		= []byte("?s")
+	setAcceleration		= []byte("a")
+	getAcceleration		= []byte("?a")
+	setLimitSwitchEnableBits= []byte("t")
+	setLimitSwitchState	= []byte("i")
+	setLimitSwitchPins	= []byte("w")
+	getLimitSwitchPosition	= []byte("?l")
+)
+
+
 type StepperMotor struct {
-	port	*serial.Port
-	reader	*bufio.Reader
+	serialport		*serial.Port
+	reader		*bufio.Reader
 }
 
 // InitStepperMotor создаёт и инициализирует новый экземпляр StepperMotor
@@ -24,24 +43,25 @@ func InitStepperMotor(portName string, baudRate int) (*StepperMotor, error) {
 	}
 	port,err := serial.OpenPort(config)
 	if err != nil {
-		return nil, fmt.Errorf("Opening port failed: %v", err)
+		return nil, fmt.Errorf("Failed to open port: %v", err)
 	}
 
-	s := &StepperMotor{
-		port: port,
+	stepper := &StepperMotor{
+		serialport: port,
 		reader: bufio.NewReader(port)
 	}
 	response, err := s.SendCommand("?f")
 	if err != nil {
-		return nil, fmt.Errorf("asking firmware info failed: %v", err)
+		return nil, fmt.Errorf("Asking firmware info failed: %v", err)
 	}
+
 	fmt.Println("firmware info:",strings.TrimSpace(response))
 	return s, nil
 }
 
 // SendCommand отправляет команду шаговому мотору и возвращает полученный ответ
-func (s *StepperMotor) SendCommand(cmd string) (string, error) {
-	_, err := s.port.Write([]byte(cmd))
+func (stepper *StepperMotor) SendCommand(cmd string) (string, error) {
+	_, err := stepper.serialPort.Write([]byte(cmd))
 	if err != nil {
 		return "", err
 	}
