@@ -29,7 +29,7 @@ var (
 
 
 type StepperMotor struct {
-	serialport		*serial.Port
+	serialPort		*serial.Port
 	reader		*bufio.Reader
 }
 
@@ -39,7 +39,7 @@ func InitStepperMotor(portName string, baudRate int) (*StepperMotor, error) {
 	config := &serial.Config{
 		Name:		portName,
 		Baud:		baudRate,
-		ReadTimeout:	time.Millisecond*500
+		ReadTimeout:	time.Millisecond*500,
 	}
 	port,err := serial.OpenPort(config)
 	if err != nil {
@@ -47,16 +47,16 @@ func InitStepperMotor(portName string, baudRate int) (*StepperMotor, error) {
 	}
 
 	stepper := &StepperMotor{
-		serialport: port,
-		reader: bufio.NewReader(port)
+		serialPort: port,
+		reader: bufio.NewReader(port),
 	}
-	response, err := s.SendCommand("?f")
+	response, err := stepper.SendCommand("?f")
 	if err != nil {
 		return nil, fmt.Errorf("Asking firmware info failed: %v", err)
 	}
 
 	fmt.Println("firmware info:",strings.TrimSpace(response))
-	return s, nil
+	return stepper, nil
 }
 
 // SendCommand отправляет команду шаговому мотору и возвращает полученный ответ
@@ -67,7 +67,7 @@ func (stepper *StepperMotor) SendCommand(cmd string) (string, error) {
 	}
 	var response strings.Builder
 	for {
-		line,err := s.reader.ReadString('\n')
+		line,err := stepper.reader.ReadString('\n')
 		if err != nil {
 			return response.String(), err
 		}
