@@ -1,4 +1,4 @@
-package device
+package devices
 
 import (
 	"bufio"
@@ -27,7 +27,7 @@ var (
 )
 
 type Shooter struct  {
-	serialPort	*seral.Port
+	serialPort	*serial.Port
 	reader		*bufio.Reader
 	enableShooting	bool
 	batchCount	int
@@ -43,7 +43,7 @@ func InitShooter(portName string, baudRate int) (*Shooter, error) {
 	config := &serial.Config{
 		Name:		portName,
 		Baud:		baudRate,
-		ReadTimeout:	time.Millisecond*500
+		ReadTimeout:	time.Millisecond*500,
 	}
 	port,err := serial.OpenPort(config)
 	if err != nil {
@@ -57,14 +57,14 @@ func InitShooter(portName string, baudRate int) (*Shooter, error) {
 		period:		1000, //microseconds
 		minPeriod:	1,
 		maxPeriod:	1000000,
-		mode:		"single"
+		mode:		"single",
 	}
 
 	attempt := 10
 	for attempt > 0 {
 		time.Sleep(1 * time.Second)
-		shooter.clearBuffer()
-		if err := shooter.serialPort.Write(getCount); err != nil {
+		shooter.ClearBuffer()
+		if _, err := shooter.serialPort.Write(getCount); err != nil {
 			attempt--
 			continue
 		}
@@ -74,7 +74,7 @@ func InitShooter(portName string, baudRate int) (*Shooter, error) {
 			continue
 		}
 		lastLine := line
-		if line == '0\r' {
+		if line == "0\r" {
 			break
 		}
 		_ = shooter.ResetShotsCount()
@@ -91,18 +91,16 @@ func InitShooter(portName string, baudRate int) (*Shooter, error) {
 func (shooter *Shooter) ClearBuffer() {
 	for {
 		shooter.serialPort.Flush()
-		shooter.serialPort.SetReadTimeout(10*Millisecond)
 		_,err := shooter.reader.ReadString('\n')
 		if err != nil {
 			break
 		}
 	}
-	shooter.serialPort.SetReadTimeout(500*time.Millisecond)
 }
 
 // GetShotsCount запрашивает и возвращает количество произведённых выстрелов с устройства
 func (shooter *Shooter) GetShotsCount() (int, error) {
-	shooter.clearBuffer()
+	shooter.ClearBuffer()
 	if _, err := shooter.serialPort.Write(getCount); err != nil {
 		return 0, err
 	}
@@ -126,18 +124,19 @@ func (shooter *Shooter) Shoot() error {
 	if !shooter.enableShooting {
 		return errors.New("Shooting is unable")
 	}
-	if shooter.Mode != "Single" {
+	if shooter.mode != "Single" {
 		return nil
 	}
 	waitDuration := time.Duration(shooter.period/1000)*time.Millisecond
-	for i := 0; i< h.batchCount; i++ {
+	for i := 0; i< shooter.batchCount; i++ {
 		if i>0 {
 			time.Sleep(waitDuration)
 		}
-		if _, err := shooter.serial.Port.Write(singleShoot); err != nil {
+		if _, err := shooter.serialPort.Write(singleShoot); err != nil {
 			return err
 		}
 	}
+	return nil
 }
 // SetEnable - переключение предохранителя
 func (shooter *Shooter) SetEnable(enable bool) error {
@@ -172,7 +171,8 @@ func (shooter *Shooter) SetVerboseFull(enable bool) error {
 	return err
 }
 // SetMode - переключение режима
-func (shooter *Shooter) SetMode(mode string) error {} {
+func (shooter *Shooter) SetMode(mode string) error {
+	cmd := singleMode
 	switch mode {
 		case "single":
 			cmd = singleMode
@@ -189,4 +189,5 @@ func (shooter *Shooter) SetMode(mode string) error {} {
 // Close - просто закрывает порт
 func (shooter *Shooter) Close() error {
 	shooter.serialPort.Close()
+	return nil
 }

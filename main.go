@@ -1,15 +1,13 @@
 package main
 
 import (
+	"femtolab/devices"
 	"fmt"
 	"log"
-	"time"
-
-	"femtolab/devices"
 )
 
 func main() {
-	DelayLine,err := devices.InitStepperMotor("/dev/ttyUSB0", 115200)
+	DelayLine, err := devices.InitStepperMotor("COM27", 115200)
 	if err != nil {
 		log.Fatal(err)
 	}

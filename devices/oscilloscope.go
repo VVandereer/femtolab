@@ -1,10 +1,10 @@
 package devices
+
 import (
 	"fmt"
 	"io"
 	"bufio"
-	"errors"
-	"string"
+	"strings"
 	"time"
 	"github.com/tarm/serial"
 )
@@ -19,7 +19,7 @@ func InitOscilloscope(portName string, baudRate int) (*Oscilloscope, error) {
 	config := &serial.Config{
 		Name:		portName,
 		Baud:		baudRate,
-		ReadTimeout:	time.Second
+		ReadTimeout:	time.Second,
 	}
 	port,err := serial.OpenPort(config)
 	if err != nil {
@@ -28,10 +28,10 @@ func InitOscilloscope(portName string, baudRate int) (*Oscilloscope, error) {
 
 	oscilloscope := &Oscilloscope {
 		serialPort:	port,
-		reader:		bufio.NewReader(port)
+		reader:		bufio.NewReader(port),
 	}
 
-	response, err := s.SendCommand("*IDN?")
+	response, err := oscilloscope.SendCommand("*IDN?")
 	if err != nil {
 		return nil, fmt.Errorf("Asking oscilloscope info failed: %v", err)
 	}
@@ -59,13 +59,13 @@ func (oscilloscope *Oscilloscope) SendCommand(cmd string) (string, error) {
 
 // Query выполняет команду с запросом данных
 func (oscilloscope *Oscilloscope) Query(cmd string) (string, error) {
-	return o.SendCommand(cmd)
+	return oscilloscope.SendCommand(cmd)
 }
 
 // ReadBytes читает бинарные данные
 func (oscilloscope *Oscilloscope) ReadBytes(size int) ([]byte, error) {
 	buffer := make([]byte, size)
 	_, err := io.ReadFull(oscilloscope.reader, buffer)
-	return buf, err
+	return buffer, err
 }
 
