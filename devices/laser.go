@@ -11,43 +11,43 @@ import (
 )
 
 var (
-	getCount		= []byte("C?")
-	resetCount		= []byte("CR")
-	dissallowShooting	= []byte("D")
+	getCount		    = []byte("C?")
+	resetCount		    = []byte("CR")
+	disallowShooting	= []byte("D")
 	allowShooting		= []byte("A")
-	SetPeriod		= []byte("P")
-	verboseFull		= []byte("VF")
-	verboseNone		= []byte("VN")
-	singleShoot		= []byte("S")
-	singleMode		= []byte("MM")
-	freqMode		= []byte("MF")
+	SetPeriod		    = []byte("P")
+	verboseFull		    = []byte("VF")
+	verboseNone		    = []byte("VN")
+	singleShoot		    = []byte("S")
+	singleMode		    = []byte("MM")
+	freqMode		    = []byte("MF")
 	externalMode		= []byte("ME")
-	externalIN1		= []byte("I1")
-	externalIN2		= []byte("I2")
+	externalIN1	    	= []byte("I1")
+	externalIN2		    = []byte("I2")
 )
 
 type Shooter struct  {
-	serialPort	*serial.Port
-	reader		*bufio.Reader
-	enableShooting	bool
-	batchCount	int
-	period		int
-	minPeriod	int
-	maxPeriod	int
-	mode		string
+	serialPort	        *serial.Port
+	reader		        *bufio.Reader
+	enableShooting	    bool
+	batchCount	        int
+	period		        int
+	minPeriod	        int
+	maxPeriod	        int
+	mode		        string
 }
 
 // InitShooter инциализирует и создаёт экземпляр Shooter
-func InitShooter(portName string, baudRate int) (*Shooter, error) {
-	fmt.Println("Initializing Shooter on port", portName)
+func InitShooter(portName string, baudRate int) *Shooter {
+	log.Println("Initializing Shooter on port", portName)
 	config := &serial.Config{
-		Name:		portName,
-		Baud:		baudRate,
+		Name:		    portName,
+		Baud:		    baudRate,
 		ReadTimeout:	time.Millisecond*500,
 	}
 	port,err := serial.OpenPort(config)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open port: %v", err)
+		log.Fatalf("Failed to open port: %v", err)
 	}
 
 	shooter := &Shooter {
@@ -80,12 +80,12 @@ func InitShooter(portName string, baudRate int) (*Shooter, error) {
 		_ = shooter.ResetShotsCount()
 		attempt--
 		if attempt == 0 {
-			return nil, fmt.Errorf("Shooter on &s is not ready; last readed line: %q", portName, lastLine)
+			log.Printf("Shooter on &s is not ready; last readed line: %q", portName, lastLine)
+			return
 		}
 	}
-
-	fmt.Println("Successed initializing Shooter on port ", portName)
-	return shooter, nil
+	log.Println("Successed initializing Shooter on port ", portName)
+	return shooter
 }
 // ClearBuffer очищает буффер устройства
 func (shooter *Shooter) ClearBuffer() {
@@ -140,7 +140,7 @@ func (shooter *Shooter) Shoot() error {
 }
 // SetEnable - переключение предохранителя
 func (shooter *Shooter) SetEnable(enable bool) error {
-	cmd:= dissallowShooting
+	cmd:= disallowShooting
 	if enable {
 		cmd = allowShooting
 	}

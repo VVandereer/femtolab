@@ -1,43 +1,21 @@
 package main
 
 import (
+    "log"
 	"femtolab/devices"
-	"fmt"
-	"log"
+	"femtolab/logger"
 )
 
 func main() {
-	DelayLine, err := devices.InitStepperMotor("COM27", 115200)
-	if err != nil {
-		log.Fatal(err)
-	}
+    Logger.InitLog("", true)
+    log.Println("FemtoLab was starting")
 
-	// Включаем моторчик
-	if err := DelayLine.Enable(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Играемся с параметрами
-	if err := DelayLine.SetAcceleration(6400); err != nil {
-		log.Fatal(err)
-	}
-	if err := DelayLine.SetMaxSpeed(3200); err != nil {
-		log.Fatal(err)
-	}
-	// Перемещаем мотор
-	if err := DelayLine.Move(1000); err != nil {
-		log.Fatal(err)
-	}
-
-	// Запрашиваем текущую позицию моторчика
-	position, err := DelayLine.AskPosition()
-	if err != nil {
-		log.Fatal(err)
-	}
+	DelayLine := devices.InitStepperMotor("COM27", 115200)
+	DelayLine.Enable()
+    DelayLine.SetAcceleration(6400)
+	DelayLine.SetMaxSpeed(3200)
+	DelayLine.Move(1000)
+	position := DelayLine.AskPosition()
 	fmt.Printf("Текущая позиция мотора: %d\n", position)
-
-	// Отключаем мотор
-	if err := DelayLine.Disable(); err != nil {
-		log.Fatal(err)
-	}
+	DelayLine.Disable()
 }
