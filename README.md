@@ -4,21 +4,21 @@
 ## Structure 
 ```plaintext
 / (femtolab)
-├── control /              # Интерфейсы управления
-│   ├── cli.go             # CLI интерфейс
-│   ├── gui.go             # (maybe) графический интерфейс
-│   └── api_server.go      # (maybe) Web API
-├── main.go                # Ядро приложения
-├── logger.go              # Модуль логгера
-├── devices_list.go        # HAL интерфейсы устройств и их описание
-├── experiment.go          # Модуль для обработки сценария эксперимента
-├── devices/               # Модули устройств
-│   ├── stepper_motor.go   # Модуль шагового мотора
-│   ├── laser_generator.go # Модуль лазерного генератора
-│   ├── oscilloscope.go    # Модуль осциллографа
-│   ├── lockin_sr830.go    # Модуль LOCKIN SR830
-│   └── camera.go          # Модуль камеры
-├── scripts/               # Примеры и сценарии экспериментов
-│   └── example_experiment.yaml
-├── config.yaml            # Конфигурационные файлы устройства и системы
+├── control /                 # Control interfaces
+│ ├── cli.go                  # CLI interface
+│ ├── gui.go                  # (maybe) graphical interface
+│ └── api_server.go           # (maybe) Web API
+├── main.go                   # Application core
+├── logger.go                 # Logger module
+├── devices_list.go           # HAL device interfaces and their description
+├── experiment.go             # Module for processing the experiment scenario
+├── devices/                  # Device modules
+│ ├── stepper_motor.go        # Stepper motor module
+│ ├── laser_generator.go      # Laser Generator Module
+│ ├── oscilloscope.go         # Oscilloscope Module
+│ ├── lockin_sr830.go         # LOCKIN SR830 Module
+│ └── camera.go               # Camera Module
+├── scripts/                  # Examples and Experiment Scenarios
+│ └── example_experiment.yaml
+├── config.yaml               # Device and System Configuration Files
 ```
